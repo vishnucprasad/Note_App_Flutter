@@ -14,9 +14,17 @@ abstract class ApiCalls {
 }
 
 class NoteDB extends ApiCalls {
+  final dio = Dio();
+  final url = Url();
+
   // Singleton //
 
-  NoteDB._internal();
+  NoteDB._internal() {
+    dio.options = BaseOptions(
+      baseUrl: url.baseUrl,
+      responseType: ResponseType.plain,
+    );
+  }
 
   static NoteDB instance = NoteDB._internal();
 
@@ -26,17 +34,10 @@ class NoteDB extends ApiCalls {
 
   // Singleton //
 
-  final dio = Dio();
-  final url = Url();
-
   ValueNotifier<List<NoteModel>> noteListNotifier = ValueNotifier([]);
 
   @override
   Future<NoteModel?> createNote(NoteModel value) async {
-    dio.options = BaseOptions(
-      baseUrl: url.baseUrl,
-      responseType: ResponseType.plain,
-    );
     try {
       final _result = await dio.post(
         url.addNote,
@@ -67,10 +68,6 @@ class NoteDB extends ApiCalls {
 
   @override
   Future<List<NoteModel>> getAllNotes() async {
-    dio.options = BaseOptions(
-      baseUrl: url.baseUrl,
-      responseType: ResponseType.plain,
-    );
     final _result = await dio.get(url.getAllNotes);
     if (_result.data != null) {
       final _resultAsJson = jsonDecode(_result.data);
