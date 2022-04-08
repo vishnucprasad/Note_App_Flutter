@@ -51,19 +51,28 @@ class NoteDB extends ApiCalls {
       noteListNotifier.notifyListeners();
       return _newNote;
     } on DioError catch (e) {
-      print(e.response?.data);
-      print(e);
       return null;
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }
 
   @override
   Future<void> deleteNote(String id) async {
-    // TODO: implement deleteNote
-    throw UnimplementedError();
+    final _result = await dio.delete(url.deleteNote.replaceFirst('{id}', id));
+
+    if (_result.data == null) {
+      return;
+    }
+
+    final _index = noteListNotifier.value.indexWhere((note) => note.id == id);
+
+    if (_index == -1) {
+      return;
+    }
+
+    noteListNotifier.value.removeAt(_index);
+    noteListNotifier.notifyListeners();
   }
 
   @override
@@ -84,7 +93,32 @@ class NoteDB extends ApiCalls {
 
   @override
   Future<NoteModel?> update(NoteModel value) async {
-    // TODO: implement update
-    throw UnimplementedError();
+    final _result = await dio.put(url.updateNote, data: value.toJson());
+    if (_result.data == null) {
+      return null;
+    }
+
+    // find index
+    final _index =
+        noteListNotifier.value.indexWhere((note) => note.id == value.id);
+    if (_index == -1) {
+      return null;
+    }
+
+    // remove from index
+    noteListNotifier.value.removeAt(_index);
+
+    // add note in that index
+    noteListNotifier.value.insert(_index, value);
+    noteListNotifier.notifyListeners();
+    return value;
+  }
+
+  NoteModel? getNoteById(String id) {
+    try {
+      return noteListNotifier.value.firstWhere((note) => note.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }

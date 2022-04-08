@@ -23,7 +23,7 @@ class ScreenAddNote extends StatelessWidget {
               saveNote();
               break;
             case ActionType.editNote:
-              // Edit note
+              saveEditedNote();
               break;
           }
         },
@@ -44,6 +44,19 @@ class ScreenAddNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (type == ActionType.editNote) {
+      if (id == null) {
+        Navigator.of(context).pop();
+      }
+
+      final note = NoteDB.instance.getNoteById(id!);
+      if (note == null) {
+        Navigator.of(context).pop();
+      }
+
+      _titleController.text = note!.title ?? 'No title';
+      _contentController.text = note.content ?? 'No content';
+    }
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -99,6 +112,25 @@ class ScreenAddNote extends StatelessWidget {
       Navigator.of(_scaffoldKey.currentContext!).pop();
     } else {
       print('Error while saving note.');
+    }
+  }
+
+  Future<void> saveEditedNote() async {
+    final _title = _titleController.text;
+    final _content = _contentController.text;
+
+    final _editedNote = NoteModel.create(
+      id: id,
+      title: _title,
+      content: _content,
+    );
+
+    final editedNote = await NoteDB.instance.update(_editedNote);
+
+    if (editedNote != null) {
+      Navigator.of(_scaffoldKey.currentContext!).pop();
+    } else {
+      print('Error while editing note.');
     }
   }
 }

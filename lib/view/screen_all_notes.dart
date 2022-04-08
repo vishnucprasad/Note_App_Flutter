@@ -20,6 +20,18 @@ class ScreenAllNotes extends StatelessWidget {
         child: ValueListenableBuilder(
           valueListenable: NoteDB.instance.noteListNotifier,
           builder: (BuildContext context, List<NoteModel> newList, _) {
+            if (newList.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Note list empty.',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            }
+
             return GridView.count(
               crossAxisCount: 2,
               mainAxisSpacing: 10,
@@ -105,7 +117,9 @@ class NoteItem extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    NoteDB.instance.deleteNote(id);
+                  },
                   icon: const Icon(
                     Icons.delete,
                     color: Colors.redAccent,
